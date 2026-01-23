@@ -10,14 +10,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  //url      = env("DATABASE_URL") 
+  //url      = env("DATABASE_URL")
 }
 
 model Restaurant {
   id             String         @id @default(uuid())
   name           String
   description    String
-  slug           String
+  slug           String         @unique
   avatarImageURL String
   coverImageURL  String
   menuCategories MenuCategory[]
