@@ -2,16 +2,16 @@
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'IN_PREPARATION', 'FINISHED');
 
 -- CreateEnum
-CREATE TYPE "ConsumptionMethod" AS ENUM ('DINE_IN', 'TAKEAWAY');
+CREATE TYPE "ConsumptionMethod" AS ENUM ('TAKEAWAY', 'DINE_IN');
 
 -- CreateTable
 CREATE TABLE "Restaurant" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "avatarImageURL" TEXT NOT NULL,
-    "coverImageURL" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "avatarImageUrl" TEXT NOT NULL,
+    "coverImageUrl" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -35,7 +35,7 @@ CREATE TABLE "Product" (
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
-    "imageURL" TEXT NOT NULL,
+    "imageUrl" TEXT NOT NULL,
     "ingredients" TEXT[],
     "restaurantId" TEXT NOT NULL,
     "menuCategoryId" TEXT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE "Product" (
 CREATE TABLE "Order" (
     "id" SERIAL NOT NULL,
     "total" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "status" "OrderStatus" NOT NULL,
     "consumptionMethod" "ConsumptionMethod" NOT NULL,
     "restaurantId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -61,8 +61,8 @@ CREATE TABLE "Order" (
 -- CreateTable
 CREATE TABLE "OrderProduct" (
     "id" TEXT NOT NULL,
-    "orderId" INTEGER NOT NULL,
     "productId" TEXT NOT NULL,
+    "orderId" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -84,7 +84,7 @@ ALTER TABLE "Product" ADD CONSTRAINT "Product_menuCategoryId_fkey" FOREIGN KEY (
 ALTER TABLE "Order" ADD CONSTRAINT "Order_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Restaurant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrderProduct" ADD CONSTRAINT "OrderProduct_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderProduct" ADD CONSTRAINT "OrderProduct_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrderProduct" ADD CONSTRAINT "OrderProduct_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderProduct" ADD CONSTRAINT "OrderProduct_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

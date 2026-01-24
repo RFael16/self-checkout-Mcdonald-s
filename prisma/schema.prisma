@@ -16,10 +16,10 @@ datasource db {
 model Restaurant {
   id             String         @id @default(uuid())
   name           String
-  description    String
   slug           String         @unique
-  avatarImageURL String
-  coverImageURL  String
+  description    String
+  avatarImageUrl String
+  coverImageUrl  String
   menuCategories MenuCategory[]
   products       Product[]
   orders         Order[]
@@ -42,13 +42,13 @@ model Product {
   name           String
   description    String
   price          Float
-  imageURL       String
+  imageUrl       String
   ingredients    String[]
   orderProducts  OrderProduct[]
   restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId   String
-  menuCategoryId String
   menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id], onDelete: Cascade)
+  menuCategoryId String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
@@ -56,10 +56,10 @@ model Product {
 model Order {
   id                Int               @id @default(autoincrement())
   total             Float
-  status            String            @default("PENDING")
+  status            OrderStatus
   consumptionMethod ConsumptionMethod
-  restaurantId      String
   restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId      String
   orderProducts     OrderProduct[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -67,10 +67,10 @@ model Order {
 
 model OrderProduct {
   id        String   @id @default(uuid())
-  orderId   Int
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
   quantity  Int
   price     Float
   createdAt DateTime @default(now())
@@ -84,6 +84,6 @@ enum OrderStatus {
 }
 
 enum ConsumptionMethod {
-  DINE_IN
   TAKEAWAY
+  DINE_IN
 }
