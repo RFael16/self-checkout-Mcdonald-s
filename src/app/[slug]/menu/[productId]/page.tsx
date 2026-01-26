@@ -14,7 +14,7 @@ const ProductPage = async ({params}: ProductPageProps) => {
     const {slug, productId} = await params;
     const product = await db.product.findUnique({
         where: {id: productId},include:{restaurant:{
-            select: {name: true, avatarImageURL: true, slug: true}
+            select: {name: true, avatarImageUrl: true, slug: true}
         }}
     });   
     if (!product) {

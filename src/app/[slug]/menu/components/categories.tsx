@@ -39,7 +39,7 @@ const RestaurantCategories = ({ restaurant }: RestaurantCategoriesProps) => {
       <div className="p-5">
         <div className="flex items-center gap-3">
           <Image
-            src={restaurant.avatarImageURL}
+            src={restaurant.avatarImageUrl}
             alt={restaurant.name}
             height={45}
             width={45}
