@@ -2,8 +2,13 @@
 
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ConsumptionMethod } from "@prisma/client";
+import { Loader2Icon } from "lucide-react";
+import { useParams, useSearchParams } from "next/navigation";
+import { useContext, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +25,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { createOrder } from "../actions/create-order";
+import { CartContext } from "../contexts/cart";
 import { isValidCpf } from "../helpers/cpf";
 
 const formSchema = z.object({
@@ -35,6 +42,10 @@ interface FinishOrderDialogProps {
 }
 
 const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
+  const {slug} = useParams<{slug: string}>();
+  const {products} = useContext(CartContext);
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
     const form = useForm<FormSchema>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -45,9 +56,26 @@ const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
     })
 
 
-    const onSubmit = (data: FormSchema) => {
-        console.log(data);
-    }
+    const onSubmit = async (data: FormSchema) => {
+        try {
+          const consumptionMethod = searchParams.get("consumptionMethod") as ConsumptionMethod;
+          startTransition( async () => {
+            await createOrder({
+            consumptionMethod,
+            customerCpf: data.cpf,
+            customerName: data.name,
+            products, // Você precisará passar os produtos do carrinho aqui
+            slug, // Você precisará passar o ID do restaurante aqui
+        });
+        onOpenChange(false); // Fechar o diálogo após criar o pedido
+        toast.success("Pedido criado com sucesso!");
+          });
+          
+        
+       } catch (error) {
+        console.error(error);
+       }
+  };
 
     return (
         <Drawer open={Open} onOpenChange={onOpenChange}>
@@ -95,7 +123,9 @@ const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
             )}
           />
            <DrawerFooter>
-       <Button type="submit" variant="destructive" className="rounded-full">Finalizar</Button>
+       <Button type="submit" variant="destructive" className="rounded-full" disabled={isPending}>
+        {isPending && <Loader2Icon className="animate-spin mr-2" />}
+        Finalizar</Button>
       <DrawerClose asChild>
         <Button variant="outline" className="w-full rounded-full">Cancelar</Button>
       </DrawerClose>
