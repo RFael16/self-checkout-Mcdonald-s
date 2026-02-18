@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ConsumptionMethod } from "@prisma/client";
 import { Loader2Icon } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
@@ -28,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { createOrder } from "../actions/create-order";
 import { CartContext } from "../contexts/cart";
 import { isValidCpf } from "../helpers/cpf";
+import { removeCpfPunctuation } from "../helpers/cpf";
 
 const formSchema = z.object({
     name: z.string().trim().min(1, {message: "O nome é obrigatório"}),
@@ -43,6 +45,7 @@ interface FinishOrderDialogProps {
 
 const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
   const {slug} = useParams<{slug: string}>();
+    const router = useRouter();
   const {products} = useContext(CartContext);
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -59,9 +62,10 @@ const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
     const onSubmit = async (data: FormSchema) => {
         try {
           const consumptionMethod = searchParams.get("consumptionMethod") as ConsumptionMethod;
+          
           startTransition( async () => {
             await createOrder({
-            consumptionMethod,
+            consumptionMethod: consumptionMethod,
             customerCpf: data.cpf,
             customerName: data.name,
             products, // Você precisará passar os produtos do carrinho aqui
@@ -69,6 +73,8 @@ const FinishOrderDialog = ({ Open, onOpenChange}: FinishOrderDialogProps) => {
         });
         onOpenChange(false); // Fechar o diálogo após criar o pedido
         toast.success("Pedido criado com sucesso!");
+          // Redireciona para a página de pedidos com o CPF sem pontuação
+          router.push(`/${slug}/orders?cpf=${removeCpfPunctuation(data.cpf)}`);
           });
           
         

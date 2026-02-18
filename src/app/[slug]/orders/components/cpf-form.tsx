@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
 import { usePathname, useRouter } from "next/navigation";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 import { isValidCpf, removeCpfPunctuation } from "../../menu/helpers/cpf";
@@ -27,13 +27,13 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const CpfForm = () => {
-    const form = useForm<FormSchema>({resolver: zodResolver(formSchema)
+    const form = useForm<FormSchema>({resolver: zodResolver(formSchema),
     });
 
     const router = useRouter();
     const pathname = usePathname()
     const onSubmit = (data: FormSchema) => {
-        router.push(`${pathname}?cpf=${removeCpfPunctuation(data.cpf)}`); // Redireciona para a página de pedidos, passando o CPF como query param
+        router.replace(`${pathname}?cpf=${removeCpfPunctuation(data.cpf)}`); // Redireciona para a página de pedidos, passando o CPF como query param
     };
 
     const handleCancel = () => {

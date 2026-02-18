@@ -1,6 +1,9 @@
+"use client";
+
 import { OrderStatus, Prisma } from "@prisma/client";
-import { ChevronLastIcon, ScrollTextIcon } from "lucide-react";
+import { ChevronLeftIcon, ScrollTextIcon } from "lucide-react";;
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,10 +37,12 @@ const getStatusLabel = (status: OrderStatus) => {
 };
 
 const OrderList = ({ orders }: OrderListProps) => {
+    const router = useRouter();
+    const handleBackClick = () => router.back();
     return ( 
         <div className="space-y-6 p-6">
-            <Button size="icon" variant="secondary" className="rounded-full">
-                <ChevronLastIcon/>
+            <Button size="icon" variant="secondary" className="rounded-full" onClick={handleBackClick}>
+                <ChevronLeftIcon/>
             </Button>
             <div className="flex-items-center gap-3">
                 <ScrollTextIcon/>
@@ -48,30 +53,39 @@ const OrderList = ({ orders }: OrderListProps) => {
             {orders.map((order) => (
                 <Card key={order.id}>
                     <CardContent className="p-5 space-y-4">
-                        <div className={`w-fit text-whiterounded-full px-2 py-1 text-xs font-semibold
+                        <div className={`w-fit text-white rounded-full px-2 py-1 text-xs font-semibold
                             ${order.status === OrderStatus.FINISHED ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>
                             {getStatusLabel(order.status)}
                         </div>
-                        <div className="flex-items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <div className="relative h-5 w-5">
-                                <Image 
-                                src={order.restaurant.avatarImageUrl} 
-                                alt={order.restaurant.name} 
-                                className="rounded-sm"
-                                fill/>
+                                {order.restaurant.avatarImageUrl ? (
+                                    <Image
+                                        src={order.restaurant.avatarImageUrl}
+                                        alt={order.restaurant.name}
+                                        className="rounded-sm object-cover"
+                                        fill
+                                        sizes="24px"
+                                        unoptimized={false}
+                                    />
+                                ) : (
+                                    <div className="h-5 w-5 rounded-sm bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                                        {order.restaurant.name?.charAt(0) ?? "?"}
+                                    </div>
+                                )}
                             </div>
                             <p className="text-sm font-semibold">{order.restaurant.name}</p>
                         </div>
-                        <Separator />
-                       <div className="space-y-2">
-                         {order.orderProducts.map((orderProducts) => (
-                            <div key={orderProducts.id} className="flex items-center gap-2">
-                                <div className="h-5 w-5 flex-items-center justify-center rounded-full bg-gray-400 text-white text-xs font-semibold">
-                                    {orderProducts.quantity}
+                            <Separator />
+                            <div className="space-y-2">
+                            {order.orderProducts.map((orderProduct) => (
+                                <div key={orderProduct.id} className="flex items-center gap-2">
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400 text-xs font-semibold text-white">
+                                    {orderProduct.quantity}
                                 </div>
-                                <p className="text-sm">{orderProducts.product.name}</p>
-                            </div>
-                        ))}
+                                <p className="text-sm">{orderProduct.product.name}</p>
+                                </div>
+                            ))}
                        </div>
                         <Separator />
                     <p className="text-sm font-medium">{formatCurrency(order.total)}</p>
